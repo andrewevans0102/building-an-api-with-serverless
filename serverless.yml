@@ -1,0 +1,83 @@
+service: building-an-api-with-serverless
+variablesResolutionMode: 20210326
+
+frameworkVersion: ">=1.1.0 <=2.33.1"
+configValidationMode: error
+provider:
+  name: aws
+  region: us-east-1
+  runtime: python3.8
+  stage: prod
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+  apiGateway:
+    shouldStartNameWithService: true
+  lambdaHashingVersion: 20201221
+
+functions:
+  createMeals:
+    handler: meals/create.create
+    events:
+      - http:
+          path: meals/create
+          method: post
+          cors: true
+
+  listMeals:
+    handler: meals/list.list
+    events:
+      - http:
+          path: meals/list
+          method: get
+          cors: true
+
+  getMeals:
+    handler: meals/get.get
+    events:
+      - http:
+          path: meals/get
+          method: post
+          cors: true
+
+  updateMeals:
+    handler: meals/update.update
+    events:
+      - http:
+          path: meals/update
+          method: put
+          cors: true
+
+  deleteMeals:
+    handler: meals/delete.delete
+    events:
+      - http:
+          path: meals/delete
+          method: delete
+          cors: true
+
+resources:
+  Resources:
+    MealsDynamoDBTable:
+      Type: "AWS::DynamoDB::Table"
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}

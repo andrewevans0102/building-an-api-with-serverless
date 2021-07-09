@@ -1,0 +1,13 @@
+{
+  "name": "building-an-api-with-serverless",
+  "version": "1.0.0",
+  "scripts": {
+    "deploy": "serverless deploy",
+    "remove": "serverless remove"
+  },
+  "description": "Serverless CRUD service exposing a REST HTTP interface",
+  "dependencies": {
+    "serverless-package-python-functions": "^0.7.0",
+    "serverless-python-requirements": "^5.1.0"
+  }
+}
